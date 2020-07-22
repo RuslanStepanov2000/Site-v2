@@ -1,0 +1,86 @@
+﻿@page "/"
+@using Tatneft.Components
+@using Newtonsoft.Json  
+@inject IJSRuntime _JsRuntime
+@inject ServiceComponent Service
+
+<h1>Самый лучший в мире сайт</h1>
+<AuthorizeView>
+    <Authorized>
+        @context.User.Identity.Name авторизован(а), поэтому видите это сообщение 
+    </Authorized>
+
+    <NotAuthorized>
+        Вы НЕ авторизованы, поэтому видите это сообщение
+    </NotAuthorized>
+</AuthorizeView>
+
+<div class="col-md-6">
+    User ID:
+    <input class="form-control" @bind="login" />
+    Password:
+    <input class="form-control" @bind="password" />
+
+    <br />
+    <button class="btn btn-info" @onclick="@(()=>CreateToken())">Login</button>
+    <button class="btn btn-info" @onclick="@(()=>PostMethod())">Post  </button>
+
+    <hr />
+    <br />
+    <label class="col-form-label">@Bearer</label>
+    <label class="col-form-label">@Message</label>
+
+
+</div>
+
+@code{
+    string login;
+    string password;
+    string Message;
+
+    [Parameter]
+    public string Bearer { get; set; }
+
+    public void CreateToken()
+    {
+        Message = "";
+        Bearer = "";
+
+
+        var response = Service.ResponseJson("http://localhost:44322/api/login?userId=" + login+"&password="+password+"", null, null,null,RestSharp.Method.GET);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            var json = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["token"].ToString();
+            Bearer = json;
+            Message = "Create token succsess:" + response.StatusCode.ToString();
+        }
+        else
+        {
+            Message = "Create token Error:" + response.StatusCode.ToString();
+        }
+    }
+
+    public void PostMethod()
+    {
+        string Messgae = "";
+        Dictionary<string, string> header = new Dictionary<string, string>();
+        header.Add("Authorization", "Bearer" + Bearer);
+
+        var value = Guid.NewGuid().ToString();
+
+        var response = Service.ResponseJsonAuth("http://localhost:44322/api/login", value, null,  RestSharp.Method.GET);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            Message="Post Success:" + response.StatusCode.ToString();
+        }
+        else
+        {
+            Message = "Post error:" + response.StatusCode.ToString();
+        }
+    }
+
+}
+ 
+

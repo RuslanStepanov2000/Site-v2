@@ -1,0 +1,39 @@
+﻿@page "/counter"
+@using Tatneft.Data;
+<h1>Counter</h1>
+
+<p>Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+<p>
+    <b>
+        @if (regError == 1)
+        {
+            @:Пользователь с таким логином уже существвует
+        }
+    </b>
+</p>
+
+
+@code {
+    private int currentCount = 0;
+    public int regError;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+        User user = new User();
+        try
+        {
+            DBWorking dbw = new DBWorking();
+            dbw.NewUser(user);
+        }
+        catch
+        {
+            regError = 1;
+        }
+    }
+}
+
+
