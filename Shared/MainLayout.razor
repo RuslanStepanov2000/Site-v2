@@ -14,11 +14,9 @@
             </Authorized>
             <NotAuthorized>
                 <a href="/login">Login</a>
+                <a href="/signup">Sign Up</a>
             </NotAuthorized>
         </AuthorizeView>
-
-
-        <a href="https://docs.microsoft.com/en-us/aspnet/" target="_blank">About</a>
     </div>
 
     <div class="content px-4">
@@ -27,6 +25,7 @@
 </div>
 
 @code{ 
+
     //Маркирует пользователя как не аторизованного при выходе из аккаунта
     public async Task Logout()
     {

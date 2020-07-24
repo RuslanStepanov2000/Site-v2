@@ -11,10 +11,13 @@ namespace Tatneft.Data
     {
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var identity=new ClaimsIdentity(new[]
-            {
-            new Claim(ClaimTypes.Name, "ruslan@mail.ru"),
-            } , "apiauth_type");
+            //var identity=new ClaimsIdentity(new[]
+            //{
+            //new Claim(ClaimTypes.Name, "ruslan@mail.ru"),
+            //} , "apiauth_type");
+            //var user = new ClaimsPrincipal(identity);
+            var identity = new ClaimsIdentity();
+
             var user = new ClaimsPrincipal(identity);
 
             return Task.FromResult(new AuthenticationState(user));
@@ -25,7 +28,7 @@ namespace Tatneft.Data
         {
             var identity = new ClaimsIdentity(new[] 
             {
-            new Claim(ClaimTypes.Name, "ruslan@mail.ru"),
+            new Claim(ClaimTypes.Name, email),
             }, "apiauth_type");
 
             var user = new ClaimsPrincipal(identity);

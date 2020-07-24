@@ -2,7 +2,6 @@
 @using Tatneft.Data
 @using Newtonsoft.Json
 @using System.Security.Claims
-@using Tatneft.Servises 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @*@inject Blazored.LocalStorage.ILocalStorageService localStorageService
@@ -53,15 +52,17 @@
 
         claimsPrincipal = (await authenticationStateTask).User;
 
-        if (claimsPrincipal.Identity.IsAuthenticated)
+        try
         {
-            NavigationManager.NavigateTo("https://localhost:44322/");
+            if (claimsPrincipal.Identity.IsAuthenticated)
+            {
+                NavigationManager.NavigateTo("https://localhost:44322/");
+            }
         }
+        catch
         {
-            user.Email = "Ruslan@mail.ru";
-            user.Password = "Ruslan2411";
+            
         }
-
     }
 
     private async Task<bool> ValidateUser()
@@ -69,9 +70,20 @@
         //assume that user is valid
         //call an API
 
-        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Email);
-        NavigationManager.NavigateTo("/");
-        return await Task.FromResult(true);
+        DBWorkingSQLite db = new DBWorkingSQLite();
+
+        if (db.UserAuth(user).Email!=null)
+        {
+
+            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Email);
+            NavigationManager.NavigateTo("/");
+            return await Task.FromResult(true);
+        }
+        else
+        {
+            LoginMesssage = "Invalid username or password";
+            return await Task.FromResult(true);
+        }
 
         //var returnedUser = await userService.LoginAsync(user);
 

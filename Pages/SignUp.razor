@@ -1,10 +1,7 @@
-﻿@*@page  "/signup"
+﻿@page  "/signup"
 @using Tatneft.Data
-@using Tatneft.Services
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
-@inject Blazored.LocalStorage.ILocalStorageService localStorageService
-@inject IUserService userService
 
     <EditForm Model="@user" OnValidSubmit="@RegisterUser">
         <div>
@@ -17,7 +14,7 @@
             <br />
         </div>
         <div class="col-12 row">
-            <input class="form-control col-12" @bind="user.EmailAddress" placeholder="email address" />
+            <input class="form-control col-12" @bind="user.Email" placeholder="email address" />
         </div>
         <br />
         <div class="col-12 row">
@@ -25,7 +22,7 @@
         </div>
         <br />
         <div class="col-12 row">
-            <input type="password" class="form-control col-12" @bind="user.ConfirmPassword" placeholder="confirm password" />
+            <input type="password" class="form-control col-12" @bind="confirmPassword" placeholder="confirm password" />
         </div>
         <br />
         <div class="col-12 row">
@@ -42,6 +39,7 @@
 @code {
 
     private User user;
+    private string confirmPassword;
     public string LoginMesssage { get; set; }
 
     protected override Task OnInitializedAsync()
@@ -50,23 +48,25 @@
         return base.OnInitializedAsync();
     }
 
-    private async Task<bool> RegisterUser()
+    private void RegisterUser() //async Task<bool> RegisterUser()
     {
-        //assume that user is valid
-        user.Source = "APPC";
-        var returnedUser = await userService.RegisterUserAsync(user);
+        ////assume that user is valid
+        //var returnedUser = await userService.RegisterUserAsync(user);
 
-        if(returnedUser.EmailAddress != null)
-        {   
-            await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(returnedUser);
-            NavigationManager.NavigateTo("/");
-        }
-        else
-        {
-            LoginMesssage = "Invalid username or password";
-        }        
-        
-        return await Task.FromResult(true);
+        //if(returnedUser.EmailAddress != null)
+        //{   
+        //    await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(returnedUser);
+        //    NavigationManager.NavigateTo("/");
+        //}
+        //else
+        //{
+        //    LoginMesssage = "Invalid username or password";
+        //}        
+
+        //return await Task.FromResult(true);
+        DBWorkingSQLite db = new DBWorkingSQLite();
+        db.UserAddNew(user);
+
     }
 
-}*@
+}

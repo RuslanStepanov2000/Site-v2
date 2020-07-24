@@ -20,7 +20,10 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.Swagger;
 using Tatneft.Components;
 using Tatneft.Data;
-using Tatneft.Servises;
+using Microsoft.EntityFrameworkCore.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Components.Server;
 
 namespace Tatneft
 {
@@ -29,6 +32,7 @@ namespace Tatneft
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
         }
 
         public IConfiguration Configuration { get; }
@@ -40,12 +44,24 @@ namespace Tatneft
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
-            services.AddSingleton<WeatherForecastService>();
             services.AddScoped<ServiceComponent>();
             IdentityModelEventSource.ShowPII = true;
 
+            //Добавление сервиса AddEntityFramework для SQlite
+            services.AddEntityFrameworkSqlite().AddDbContext<DbContext>(
+                options => { options.UseSqlite($"Data Source=UsersDb.db"); });
+            services.AddDbContext<AppDbContext>(
+            options => { options.UseSqlite($"Data Source=UsersDb.db"); });
+
+            //Добавление сервиса ДБ
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<AppDbContext>();
+
+
             //Добавление сервиса авторизации
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+            //services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+
 
             //Добавление сервиса генерации jwt токена
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -105,6 +121,7 @@ namespace Tatneft
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapFallbackToPage("/_Host");

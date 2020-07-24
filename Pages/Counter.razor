@@ -22,17 +22,13 @@
 
     private void IncrementCount()
     {
-        currentCount++;
-        User user = new User();
-        try
+        DBWorkingSQLite db = new DBWorkingSQLite();
+        db.UserAddNew(new User
         {
-            DBWorking dbw = new DBWorking();
-            dbw.NewUser(user);
-        }
-        catch
-        {
-            regError = 1;
-        }
+            Email = "Ruslan@mail.ru",
+            Password= "Ruslan2411"
+            
+        });
     }
 }
 
