@@ -14,6 +14,6 @@ namespace Tatneft.Servises
         void UserTokenSet(User user, string token);
         void UserTokenDelete(User user);
         string UserTokenGetById(string id);
-        
+        User UserGet(string email, string password);
     }
 }

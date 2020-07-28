@@ -38,5 +38,10 @@ namespace Tatneft.Servises
         {
             throw new NotImplementedException();
         }
+
+        public User UserGet(string email, string password)
+        {
+            return new DBWorkingSQLite().UserAuth(new User { Email = email, Password = password });
+        }
     }
 }

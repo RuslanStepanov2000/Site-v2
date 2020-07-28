@@ -4,11 +4,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Security.Cryptography;
 using System.IO;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.JsonWebTokens;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
+
 
 namespace Tatneft.Data
 {
     class DBWorkingSQLite
     {
+
         //Создание подключения к БД
         private static SqliteConnection connection=new SqliteConnection("Data Source=UsersDb.db");
         
@@ -89,6 +97,7 @@ namespace Tatneft.Data
                         user.Id = reader["id"].ToString();
                         user.Password = "";
                         user.Role = reader["role"].ToString();
+                        UserTokenSet(user, GenerateJSONWebToken(user));
                         //TODO
                         //ВЫдать пользовтелю токен
                     }
@@ -132,6 +141,34 @@ namespace Tatneft.Data
             }
             connection.Close();
             return token;
+        }
+        private string GenerateJSONWebToken(User user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Jwt:Key"));
+            var credintalis = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            if (user.Email != null)
+            {
+                var claims = new[] {
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Role, user.Role)
+                 };
+                var token = new JwtSecurityToken(
+                    issuer: "Jwt:Issuer",
+                    audience: "Jwt:Issuer",
+                    claims,
+                    expires: DateTime.Now.AddHours(24),
+                    signingCredentials: credintalis);
+                var encodetoken = new JwtSecurityTokenHandler().WriteToken(token);
+                return encodetoken;
+            }
+            else
+            {
+                return null;
+            }
+
+
         }
     }
 }
