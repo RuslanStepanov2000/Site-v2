@@ -24,6 +24,8 @@ using Microsoft.EntityFrameworkCore.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Components.Server;
+using System.Net.Http;
+using Tatneft.Servises;
 
 namespace Tatneft
 {
@@ -47,6 +49,8 @@ namespace Tatneft
             services.AddScoped<ServiceComponent>();
             IdentityModelEventSource.ShowPII = true;
 
+            services.AddSingleton<HttpClient>();
+
             //Добавление сервиса AddEntityFramework для SQlite
             services.AddEntityFrameworkSqlite().AddDbContext<DbContext>(
                 options => { options.UseSqlite($"Data Source=UsersDb.db"); });
@@ -57,6 +61,8 @@ namespace Tatneft
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<AppDbContext>();
 
+            //Добавление сервиса работы с пользовтелями
+            services.AddSingleton<IUserService, UserService>();
 
             //Добавление сервиса авторизации
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();

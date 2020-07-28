@@ -11,40 +11,42 @@ using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegiste
 
 namespace Tatneft.Controllers
 {
-    [Authorize]
-    [Route("api/[controller]")]
     [ApiController]
-    public class LoginController : ControllerBase
+    [Route("api/[controller]")]
+    public class LoginController_old : Controller
     {
         private IConfiguration _config;
 
-        public LoginController(IConfiguration config)
+        public LoginController_old(IConfiguration config)
         {
             _config = config;
         }
 
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult Login(string userId, string password)
+        public IActionResult Login(string email, string password)
         {
             User user = new User();
-            user.Login = userId;
+            user.Email = email;
             user.Password = password;
 
-            IActionResult response = Unauthorized();
 
-            //user = AuthenticateUser(user);
+            IActionResult response;
+            //Поиск пользователя в базе
+            user = new DBWorkingSQLite().UserAuth(user);
 
-            //Поиск пользователя в базе, добавление его роли
-            user = new DBWorking().Auth(user);
-
-            if (user.Login != null)
+            if (user.Email != null)
             {
+                //Создание и запись токена в бд
                 var tokenString = GenerateJSONWebToken(user);
+                new DBWorkingSQLite().UserTokenSet(user, tokenString);
                 response = Ok(new { token = tokenString });
             }
+            else
+            {
+                response = Unauthorized();
+            }
             return response;
-
         }
         //private User AuthenticateUser(User login)
         //{
@@ -61,16 +63,13 @@ namespace Tatneft.Controllers
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credintalis = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            if (user.Login != null)
+            if (user.Email != null)
             {
                 var claims = new[] {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Login),
-            //new Claim(JwtRegisteredClaimNames.Email, user.email),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.Role, user.Role)
                  };
-
-
 
                 var token = new JwtSecurityToken(
                     issuer: _config["Jwt:Issuer"],
@@ -81,10 +80,11 @@ namespace Tatneft.Controllers
                 var encodetoken = new JwtSecurityTokenHandler().WriteToken(token);
                 return encodetoken;
             }
-            else {
-                return "не дам токен, не правильный логин/пароль";
+            else
+            {
+                return null;
             }
-            
+
 
         }
 

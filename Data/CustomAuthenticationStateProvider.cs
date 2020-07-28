@@ -24,16 +24,22 @@ namespace Tatneft.Data
         }
 
         //Помечает пользователя как авторизованного
-        public void MarkUserAsAuthenticated(string email)
+        public void MarkUserAsAuthenticated(User user)
         {
-            var identity = new ClaimsIdentity(new[] 
-            {
-            new Claim(ClaimTypes.Name, email),
-            }, "apiauth_type");
+            //var identity = new ClaimsIdentity(new[] 
+            //{
+            //new Claim(ClaimTypes.Name, user.Email),
+            //}, "apiauth_type");
 
-            var user = new ClaimsPrincipal(identity);
+            //var user = new ClaimsPrincipal(identity);
+
+            user.ClaimsIdentity = new ClaimsIdentity(new[]
+            {
+            new Claim(ClaimTypes.Name, user.Email),
+            }, "apiauth_type");
+            user.ClaimsPrincipal = new ClaimsPrincipal(user.ClaimsIdentity);
             //Уведомляет все конструкции авторизированного доступа об изменении авторизации пользователя
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user.ClaimsPrincipal)));
         }
         public async Task MarkUserAsLoggedOut()
         {

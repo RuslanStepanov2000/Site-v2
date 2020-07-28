@@ -4,10 +4,5 @@
         <name>Tatneft</name>
     </assembly>
     <members>
-        <member name="M:Tatneft.Data.DBWorking.NewUserPush(Tatneft.Data.User,System.String)">
-            <summary>
-            Добавление пользователя в БД
-            </summary>
-        </member>
     </members>
 </doc>

@@ -101,9 +101,37 @@ namespace Tatneft.Data
         }
         
         //Добавление токена пользователя
-        public void UserTokenAdd(User user, string token)
+        public void UserTokenSet(User user, string token)
         {
+            SqliteCommand comm = new SqliteCommand();
 
+            comm.CommandText = "insert into userToken (token) values(@token) where id=@id";
+            comm.Parameters.AddWithValue("@token", token);
+            comm.Parameters.AddWithValue("@id", user.Id);
+
+            connection.Open();
+            comm.ExecuteNonQuery();
+            connection.Close();
+        }
+        public string UserTokenGetById(string id)
+        {
+            string token;
+            SqliteCommand comm = connection.CreateCommand();
+
+            connection.Open();
+            comm.CommandText = "select * from userTokens where id=@id";
+            comm.Parameters.AddWithValue("@id", id);
+
+            using (var reader = comm.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                     token = reader["token"].ToString();
+                }
+                else return "token";
+            }
+            connection.Close();
+            return token;
         }
     }
 }

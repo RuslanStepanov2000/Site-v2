@@ -28,7 +28,7 @@ namespace Tatneft.Components
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CamelCaseSerializer()
-             };
+            };
             if (requestHeader != null)
             {
                 foreach (var item in requestHeader)
@@ -61,7 +61,7 @@ namespace Tatneft.Components
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CamelCaseSerializer()
-             };
+            };
             if (requestHeader != null)
             {
                 foreach (var item in requestHeader)

@@ -1,19 +1,28 @@
 ﻿@page "/counter"
 @using Tatneft.Data;
-<h1>Counter</h1>
+    <AuthorizeView>
+        <Authorized>
+            <h1>Counter</h1>
 
-<p>Current count: @currentCount</p>
+            <p>Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+            <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-<p>
-    <b>
-        @if (regError == 1)
-        {
-            @:Пользователь с таким логином уже существвует
-        }
-    </b>
-</p>
+            <p>
+                <b>
+                    @if (regError == 1)
+                    {
+                        @:Пользователь с таким логином уже существвует
+                    }
+                </b>
+            </p>
+        </Authorized>
+        <NotAuthorized>
+            <h1>
+                Вы не авторизованы
+            </h1>
+        </NotAuthorized>
+    </AuthorizeView>
 
 
 @code {
@@ -22,13 +31,7 @@
 
     private void IncrementCount()
     {
-        DBWorkingSQLite db = new DBWorkingSQLite();
-        db.UserAddNew(new User
-        {
-            Email = "Ruslan@mail.ru",
-            Password= "Ruslan2411"
-            
-        });
+        currentCount++;
     }
 }
 

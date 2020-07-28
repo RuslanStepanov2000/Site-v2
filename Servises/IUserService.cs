@@ -1,16 +1,19 @@
-﻿//using Tatneft.Data;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Tatneft.Data;
 
-//namespace Tatneft.Services
-//{
-//    public interface IUserService
-//    {
-//        public Task<User> LoginAsync(User user);
-//        public Task<User> RegisterUserAsync(User user);
-//        public Task<User> GetUserByAccessTokenAsync(string accessToken);
-//        public Task<User> RefreshTokenAsync(RefreshRequest refreshRequest);
-//    }
-//}
+namespace Tatneft.Servises
+{
+    public interface IUserService
+    {
+        void UserNew(User user);
+        void UserDelete(User user);
+        void UserUpdate(User user, string param);
+        void UserTokenSet(User user, string token);
+        void UserTokenDelete(User user);
+        string UserTokenGetById(string id);
+        
+    }
+}

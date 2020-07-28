@@ -1,111 +1,42 @@
-﻿//using Microsoft.Extensions.Options;
-//using Newtonsoft.Json;
-//using Tatneft.Data;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Net.Http;
-//using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Tatneft.Data;
 
+namespace Tatneft.Servises
+{
+    public class UserService : IUserService
+    {
+        public void UserDelete(User user)
+        {
+            throw new NotImplementedException();
+        }
 
-//namespace Tatneft.Services
-//{
-//    public class UserService : IUserService
-//    {
-//        public HttpClient _httpClient { get; }
-//        public AppSettings _appSettings { get; }
+        public string UserTokenGetById(string id)
+        {
+            return new DBWorkingSQLite().UserTokenGetById(id);
+        }
 
-//        public UserService(HttpClient httpClient, IOptions<AppSettings> appSettings)
-//        {
-//            _appSettings = appSettings.Value;
+        public void UserNew(User user)
+        {
+            new DBWorkingSQLite().UserAddNew(user);
+        }
 
-//            httpClient.BaseAddress = new Uri(_appSettings.BookStoresBaseAddress);
-//            httpClient.DefaultRequestHeaders.Add("User-Agent", "BlazorServer");
+        public void UserTokenSet(User user, string token)
+        {
+            new DBWorkingSQLite().UserTokenSet(user, token);
 
-//            _httpClient = httpClient;
-//        }
+        }
 
-//        public async Task<User> LoginAsync(User user)
-//        {
-//            user.Password = Utility.Encrypt(user.Password);
-//            string serializedUser = JsonConvert.SerializeObject(user);
+        public void UserTokenDelete(User user)
+        {
+            throw new NotImplementedException();
+        }
 
-//            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "Users/Login");
-//            requestMessage.Content = new StringContent(serializedUser);
-
-//            requestMessage.Content.Headers.ContentType
-//                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-
-//            var response = await _httpClient.SendAsync(requestMessage);
-
-//            var responseStatusCode = response.StatusCode;
-//            var responseBody = await response.Content.ReadAsStringAsync();
-
-//            var returnedUser = JsonConvert.DeserializeObject<User>(responseBody);
-
-//            return await Task.FromResult(returnedUser);
-
-//        }
-
-//        public async Task<User> RegisterUserAsync(User user)
-//        {
-//            user.Password = Utility.Encrypt(user.Password);
-//            string serializedUser = JsonConvert.SerializeObject(user);
-
-//            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "Users/RegisterUser");
-//            requestMessage.Content = new StringContent(serializedUser);
-
-//            requestMessage.Content.Headers.ContentType
-//                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-
-//            var response = await _httpClient.SendAsync(requestMessage);
-
-//            var responseStatusCode = response.StatusCode;
-//            var responseBody = await response.Content.ReadAsStringAsync();
-
-//            var returnedUser = JsonConvert.DeserializeObject<User>(responseBody);
-
-//            return await Task.FromResult(returnedUser);
-//        }
-
-//        public async Task<User> RefreshTokenAsync(RefreshRequest refreshRequest)
-//        {
-//            string serializedUser = JsonConvert.SerializeObject(refreshRequest);
-
-//            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "Users/RefreshToken");
-//            requestMessage.Content = new StringContent(serializedUser);
-
-//            requestMessage.Content.Headers.ContentType
-//                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-
-//            var response = await _httpClient.SendAsync(requestMessage);
-
-//            var responseStatusCode = response.StatusCode;
-//            var responseBody = await response.Content.ReadAsStringAsync();
-
-//            var returnedUser = JsonConvert.DeserializeObject<User>(responseBody);
-
-//            return await Task.FromResult(returnedUser);
-//        }
-
-//        public async Task<User> GetUserByAccessTokenAsync(string accessToken)
-//        {
-//            string serializedRefreshRequest = JsonConvert.SerializeObject(accessToken);
-
-//            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "Users/GetUserByAccessToken");
-//            requestMessage.Content = new StringContent(serializedRefreshRequest);
-
-//            requestMessage.Content.Headers.ContentType
-//                = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-
-//            var response = await _httpClient.SendAsync(requestMessage);
-
-//            var responseStatusCode = response.StatusCode;
-//            var responseBody = await response.Content.ReadAsStringAsync();
-
-//            var returnedUser = JsonConvert.DeserializeObject<User>(responseBody);
-
-//            return await Task.FromResult(returnedUser);
-//        }
-//    }
-//}
+        public void UserUpdate(User user, string param)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

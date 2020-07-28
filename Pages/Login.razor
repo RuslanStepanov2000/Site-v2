@@ -4,6 +4,7 @@
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inject HttpClient http;
 @*@inject Blazored.LocalStorage.ILocalStorageService localStorageService
 @inject IUserService userService*@
 @*@inject IJSRuntime jsRunTime*@
@@ -61,7 +62,7 @@
         }
         catch
         {
-            
+
         }
     }
 
@@ -70,12 +71,14 @@
         //assume that user is valid
         //call an API
 
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+
+        httpRequestMessage.Method = new HttpMethod("POST");
         DBWorkingSQLite db = new DBWorkingSQLite();
 
         if (db.UserAuth(user).Email!=null)
         {
-
-            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Email);
+            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
             NavigationManager.NavigateTo("/");
             return await Task.FromResult(true);
         }
@@ -99,5 +102,24 @@
 
         //return await Task.FromResult(true);
     }
+    //public void CreateToken()
+    //{
+    //    Message = "";
+    //    Bearer = "";
+
+
+    //    var response = Service.ResponseJson("http://localhost:44322/api/login?userId=" + login + "&password=" + password + "", null, null, null, RestSharp.Method.GET);
+
+    //    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+    //    {
+    //        var json = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["token"].ToString();
+    //        Bearer = json;
+    //        Message = "Create token succsess:" + response.StatusCode.ToString();
+    //    }
+    //    else
+    //    {
+    //        Message = "Create token Error:" + response.StatusCode.ToString();
+    //    }
+    //}
 
 }
