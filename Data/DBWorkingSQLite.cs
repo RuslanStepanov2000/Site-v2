@@ -58,10 +58,24 @@ namespace Tatneft.Data
             try
             { 
                 connection.Open();
+                //заполнение таблицы данных пользовтеля
                 comm.CommandText = "INSERT INTO userData (email,password,salt) VALUES(@email, @password, @salt)";
                 comm.Parameters.AddWithValue("@email", user.Email);
                 comm.Parameters.AddWithValue("@password", user.Password);
                 comm.Parameters.AddWithValue("@salt", salt);
+                comm.ExecuteNonQuery();
+
+                //Получение Id нового пользовтеля и создание записи в таблице токенов 
+                comm.CommandText = "select * from userData where email=@email";
+                comm.Parameters.AddWithValue("@email", user.Email);
+
+                using (var reader = comm.ExecuteReader())
+                {
+                   reader.Read();
+                   user.Id = reader["id"].ToString();
+                }
+                comm.CommandText = "INSERT into userTokens (id=@id)";
+                comm.Parameters.AddWithValue("@id", user.Id);
                 comm.ExecuteNonQuery();
                 connection.Close();
             }
@@ -71,7 +85,7 @@ namespace Tatneft.Data
             }
         }
 
-        //Авторизация пользователя и получение его параметров
+        //Авторизация пользователя и получение его параметров, запись его нового токена в базу.
         public User UserAuth(User user)
         {
             SqliteCommand comm = connection.CreateCommand();
@@ -97,9 +111,11 @@ namespace Tatneft.Data
                         user.Id = reader["id"].ToString();
                         user.Password = "";
                         user.Role = reader["role"].ToString();
-                        UserTokenSet(user, GenerateJSONWebToken(user));
-                        //TODO
-                        //ВЫдать пользовтелю токен
+
+                        var token = GenerateJSONWebToken(user);
+                        user.Token = token;
+                        UserTokenSet(user, token);
+                        
                     }
                     else user = new User();
                 }
@@ -112,13 +128,21 @@ namespace Tatneft.Data
         //Добавление токена пользователя
         public void UserTokenSet(User user, string token)
         {
-            SqliteCommand comm = new SqliteCommand();
-
-            comm.CommandText = "insert into userToken (token) values(@token) where id=@id";
-            comm.Parameters.AddWithValue("@token", token);
-            comm.Parameters.AddWithValue("@id", user.Id);
+            SqliteCommand comm = connection.CreateCommand();
 
             connection.Open();
+            comm.CommandText = "select * from userData where email=@email";
+            comm.Parameters.AddWithValue("@email", user.Email);
+
+            using (var reader = comm.ExecuteReader())
+            {
+                reader.Read();
+                user.Id = reader["id"].ToString();
+            }
+            comm.CommandText= "UPDATE userTokens SET token=@token WHERE id=@id";
+            //comm.CommandText = "insert into userToken (token) values(@token) where id=@id";
+            comm.Parameters.AddWithValue("@token", token);
+            comm.Parameters.AddWithValue("@id", user.Id);
             comm.ExecuteNonQuery();
             connection.Close();
         }
@@ -144,7 +168,7 @@ namespace Tatneft.Data
         }
         private string GenerateJSONWebToken(User user)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Jwt:Key"));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Jwt:Keyqwertyuytrewertyuiqwe"));
             var credintalis = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             if (user.Email != null)
@@ -170,5 +194,6 @@ namespace Tatneft.Data
 
 
         }
+        
     }
 }

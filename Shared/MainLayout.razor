@@ -29,6 +29,7 @@
     //Маркирует пользователя как не аторизованного при выходе из аккаунта
     public async Task Logout()
     {
+
         await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
         NavigationManager.NavigateTo("");
     }

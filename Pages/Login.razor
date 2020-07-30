@@ -1,15 +1,15 @@
 ﻿@page  "/login"
+
 @using Tatneft.Data
-@using Newtonsoft.Json
 @using System.Security.Claims
+
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject HttpClient http;
-@*@inject Blazored.LocalStorage.ILocalStorageService localStorageService
-@inject IUserService userService*@
-@*@inject IJSRuntime jsRunTime*@
 
-<EditForm Model="@user" OnValidSubmit="@ValidateUser">
+
+<EditForm Model="@user" OnValidSubmit="@Authentication">
     <div>
         <br /><br /><br /><br /><br />
     </div>
@@ -19,7 +19,7 @@
     <div>
         <br />
     </div>
-    <div class="col-12 row">    
+    <div class="col-12 row">
         <input class="form-control col-12" @bind="user.Email" placeholder="email address" />
     </div>
     <br />
@@ -43,6 +43,7 @@
     private User user;
     public string LoginMesssage { get; set; }
     ClaimsPrincipal claimsPrincipal;
+
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -71,12 +72,12 @@
         //assume that user is valid
         //call an API
 
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+        //HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
 
-        httpRequestMessage.Method = new HttpMethod("POST");
+        //httpRequestMessage.Method = new HttpMethod("POST");
         DBWorkingSQLite db = new DBWorkingSQLite();
 
-        if (db.UserAuth(user).Email!=null)
+        if (db.UserAuth(user).Email != null)
         {
             ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
             NavigationManager.NavigateTo("/");
@@ -88,38 +89,34 @@
             return await Task.FromResult(true);
         }
 
-        //var returnedUser = await userService.LoginAsync(user);
-
-        //if (returnedUser.EmailAddress != null)
-        //{
-        //    await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Email);
-        //    NavigationManager.NavigateTo("/index");
-        //}
-        //else
-        //{
-        //    LoginMesssage = "Invalid username or password";
-        //}
-
-        //return await Task.FromResult(true);
     }
-    //public void CreateToken()
-    //{
-    //    Message = "";
-    //    Bearer = "";
+
+    private async Task<bool> Authentication()
+    {
+        string jsonString;
+        DBWorkingSQLite db = new DBWorkingSQLite();
+
+        if (db.UserAuth(user).Email != null)
+        {
+            jsonString = System.Text.Json.JsonSerializer.Serialize(user);
+            HttpClient httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("https://localhost:44322");
+            HttpResponseMessage response = httpClient.PostAsJsonAsync("api/User", user).Result;         
 
 
-    //    var response = Service.ResponseJson("http://localhost:44322/api/login?userId=" + login + "&password=" + password + "", null, null, null, RestSharp.Method.GET);
+            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
+            NavigationManager.NavigateTo("/");
+            return await Task.FromResult(true);
+        }
+        else
+        {
+            LoginMesssage = "Invalid username or password";
+            return await Task.FromResult(true);
+        }
 
-    //    if (response.StatusCode == System.Net.HttpStatusCode.OK)
-    //    {
-    //        var json = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["token"].ToString();
-    //        Bearer = json;
-    //        Message = "Create token succsess:" + response.StatusCode.ToString();
-    //    }
-    //    else
-    //    {
-    //        Message = "Create token Error:" + response.StatusCode.ToString();
-    //    }
-    //}
+
+
+
+    }
 
 }
