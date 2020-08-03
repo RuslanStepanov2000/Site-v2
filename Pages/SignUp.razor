@@ -49,24 +49,9 @@
     }
 
     private void RegisterUser() //async Task<bool> RegisterUser()
-    {
-        ////assume that user is valid
-        //var returnedUser = await userService.RegisterUserAsync(user);
-
-        //if(returnedUser.EmailAddress != null)
-        //{   
-        //    await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(returnedUser);
-        //    NavigationManager.NavigateTo("/");
-        //}
-        //else
-        //{
-        //    LoginMesssage = "Invalid username or password";
-        //}        
-
-        //return await Task.FromResult(true);
+    {    
         DBWorkingSQLite db = new DBWorkingSQLite();
         db.UserAddNew(user);
-
     }
 
 }

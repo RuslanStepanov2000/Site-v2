@@ -19,12 +19,6 @@ namespace Tatneft.Data
 
         //Создание подключения к БД
         private static SqliteConnection connection=new SqliteConnection("Data Source=UsersDb.db");
-        
-        //private SqliteConnection Connection()
-        //{
-        //    return new SqliteConnection("Data Source=UsersDb.db");
-            
-        //}
 
         //Получение пароля из хэша и соли из БД
         private string GetPassword(string salt, string password)
@@ -146,6 +140,8 @@ namespace Tatneft.Data
             comm.ExecuteNonQuery();
             connection.Close();
         }
+
+        //Получение токена пользовтеля по его Id
         public string UserTokenGetById(string id)
         {
             string token;
@@ -166,6 +162,7 @@ namespace Tatneft.Data
             connection.Close();
             return token;
         }
+        //Создание токена
         private string GenerateJSONWebToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Jwt:Keyqwertyuytrewertyuiqwe"));

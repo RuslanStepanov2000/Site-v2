@@ -29,9 +29,18 @@
     //Маркирует пользователя как не аторизованного при выходе из аккаунта
     public async Task Logout()
     {
+        //string jsonString;
+        //DBWorkingSQLite db = new DBWorkingSQLite();
+
+        ////Создание тела запроса(json) и post запрос, получение токена пользовтелем
+        //jsonString = System.Text.Json.JsonSerializer.Serialize(user);
+        //HttpClient httpClient = new HttpClient();
+        //httpClient.BaseAddress = new Uri("https://localhost:44322");
+        //httpClient.PostAsJsonAsync("/api/[controller]/PostTokenClean", user);
+
 
         await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
         NavigationManager.NavigateTo("");
     }
-}
+   }
 

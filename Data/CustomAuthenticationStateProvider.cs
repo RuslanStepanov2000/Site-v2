@@ -11,11 +11,7 @@ namespace Tatneft.Data
     {
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            //var identity=new ClaimsIdentity(new[]
-            //{
-            //new Claim(ClaimTypes.Name, "ruslan@mail.ru"),
-            //} , "apiauth_type");
-            //var user = new ClaimsPrincipal(identity);
+           
             var identity = new ClaimsIdentity();
 
             var user = new ClaimsPrincipal(identity);
@@ -26,13 +22,6 @@ namespace Tatneft.Data
         //Помечает пользователя как авторизованного
         public void MarkUserAsAuthenticated(User user)
         {
-            //var identity = new ClaimsIdentity(new[] 
-            //{
-            //new Claim(ClaimTypes.Name, user.Email),
-            //}, "apiauth_type");
-
-            //var user = new ClaimsPrincipal(identity);
-
             user.ClaimsIdentity = new ClaimsIdentity(new[]
             {
             new Claim(ClaimTypes.Name, user.Email),

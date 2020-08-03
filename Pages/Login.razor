@@ -67,43 +67,22 @@
         }
     }
 
-    private async Task<bool> ValidateUser()
-    {
-        //assume that user is valid
-        //call an API
-
-        //HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-
-        //httpRequestMessage.Method = new HttpMethod("POST");
-        DBWorkingSQLite db = new DBWorkingSQLite();
-
-        if (db.UserAuth(user).Email != null)
-        {
-            ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
-            NavigationManager.NavigateTo("/");
-            return await Task.FromResult(true);
-        }
-        else
-        {
-            LoginMesssage = "Invalid username or password";
-            return await Task.FromResult(true);
-        }
-
-    }
-
+    //Аутентификация пользовтеля и установка его прав доступа к контенту
     private async Task<bool> Authentication()
     {
         string jsonString;
         DBWorkingSQLite db = new DBWorkingSQLite();
 
+
         if (db.UserAuth(user).Email != null)
         {
+            //Создание тела запроса(json) и post запрос, получение токена пользовтелем
             jsonString = System.Text.Json.JsonSerializer.Serialize(user);
             HttpClient httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri("https://localhost:44322");
-            HttpResponseMessage response = httpClient.PostAsJsonAsync("api/User", user).Result;         
+            HttpResponseMessage response = httpClient.PostAsJsonAsync("api/User", user).Result;
 
-
+            
             ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
             NavigationManager.NavigateTo("/");
             return await Task.FromResult(true);
@@ -113,10 +92,6 @@
             LoginMesssage = "Invalid username or password";
             return await Task.FromResult(true);
         }
-
-
-
-
     }
 
 }
