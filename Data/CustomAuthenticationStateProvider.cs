@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
+﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,38 +10,79 @@ namespace Tatneft.Data
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        private ILocalStorageService _localStorageService { get; }
+        public CustomAuthenticationStateProvider(ILocalStorageService localStorageService)
         {
-           
-            var identity = new ClaimsIdentity();
+            //throw new Exception("CustomAuthenticationStateProviderException");
+            _localStorageService = localStorageService;
+        }
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            var accessToken = await _localStorageService.GetItemAsync<string>("accessToken");
 
-            var user = new ClaimsPrincipal(identity);
+            ClaimsIdentity identity;
 
-            return Task.FromResult(new AuthenticationState(user));
+            if (accessToken != null && accessToken != string.Empty)
+            {
+                User user = new User{
+                    Email = "qqweqe@mail.ru",
+                    Role = "ssss"
+                };
+                identity = GetClaimsIdentity(user);
+            }
+            else
+            {
+                identity = new ClaimsIdentity();
+            }
+
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
+            return await Task.FromResult(new AuthenticationState(claimsPrincipal));
         }
 
         //Помечает пользователя как авторизованного
-        public void MarkUserAsAuthenticated(User user)
+        public void  MarkUserAsAuthenticated(User user)
         {
-            user.ClaimsIdentity = new ClaimsIdentity(new[]
-            {
-            new Claim(ClaimTypes.Name, user.Email),
-            }, "apiauth_type");
-            user.ClaimsPrincipal = new ClaimsPrincipal(user.ClaimsIdentity);
+            
+            //_localStorageService.SetItemAsync("Email", user.Email);
+            _localStorageService.SetItemAsync("Token", user.Token);
+            
+            var identity = GetClaimsIdentity(user);
+
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
             //Уведомляет все конструкции авторизированного доступа об изменении авторизации пользователя
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user.ClaimsPrincipal)));
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
+          
         }
         public async Task MarkUserAsLoggedOut()
         {
-           // await _localStorageService.RemoveItemAsync("refreshToken");
-           // await _localStorageService.RemoveItemAsync("accessToken");
-
+            //await _localStorageService.RemoveItemAsync("Email");
+            //await _localStorageService.RemoveItemAsync("Token");
             var identity = new ClaimsIdentity();
-
-            var user = new ClaimsPrincipal(identity);
+            var claimsPrincipal = new ClaimsPrincipal(identity);
 
             //Уведомляет все конструкции авторизированного доступа об изменении авторизации пользователя
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
+        }
+        public string getLocalToken()
+        {
+            return _localStorageService.GetItemAsync<string>("Token").ToString();
+        }
+        private ClaimsIdentity GetClaimsIdentity(User user)
+        {
+            var claimsIdentity = new ClaimsIdentity();
+
+            if (user.Email != null)
+            {
+                claimsIdentity = new ClaimsIdentity(new[]
+                                {
+                                    new Claim(ClaimTypes.Name, user.Email),
+                                    new Claim(ClaimTypes.Role, user.Role)
+                                }, "apiauth_type");
+            }
+
+            return claimsIdentity;
         }
     }
 }

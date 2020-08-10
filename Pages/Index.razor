@@ -1,5 +1,11 @@
-﻿@page "/"
-@using Tatneft.Components
+﻿@page "/home"
+@using Tatneft.Data
+@using Blazored.LocalStorage
+@using System.Security.Claims
+@inject Blazored.LocalStorage.ILocalStorageService localStorageService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
 
 
 <h1>Самый лучший в мире сайт</h1>
@@ -12,5 +18,34 @@
         Вы НЕ авторизованы, поэтому видите это сообщение
     </NotAuthorized>
 </AuthorizeView>
+
+@code{
+    private User user;
+    ClaimsPrincipal claimsPrincipal;
+
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user_auth = authState.User;
+
+        if (!user_auth.Identity.IsAuthenticated)
+        {
+            string token = await localStorageService.GetItemAsync<string>("Token");
+            if (token != null)
+            {
+                user = new Tatneft.Data.DBWorkingSQLite().UserGetByToken(token);
+                if (user != null)
+                {
+                    ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
+                }
+                else { }
+            }
+        }
+    }
+}
 
 

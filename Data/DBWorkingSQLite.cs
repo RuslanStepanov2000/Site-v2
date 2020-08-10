@@ -98,8 +98,8 @@ namespace Tatneft.Data
                     user.Salt = reader["salt"].ToString();
                     //Проверяем пароль. В случае успеха выдаем токен. Если пароль не правильный возвращается пустой класс пользователя
                     
-                    string str1 = GetPassword(user.Salt, user.Password);
-                    string str2 = reader["password"].ToString();
+                    //string str1 = GetPassword(user.Salt, user.Password);
+                    //string str2 = reader["password"].ToString();
                     if ( GetPassword(user.Salt, user.Password) == reader["password"].ToString())
                     {
                         user.Id = reader["id"].ToString();
@@ -161,6 +161,39 @@ namespace Tatneft.Data
             }
             connection.Close();
             return token;
+        }
+        public User UserGetByToken(string token)
+        {
+            User user = new User();
+            string id;
+
+            SqliteCommand comm = connection.CreateCommand();
+
+            connection.Open();
+            comm.CommandText = "select * from userTokens where token=@token";
+            comm.Parameters.AddWithValue("@token", token);
+
+            using (var reader = comm.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    id = reader["id"].ToString();
+                }
+                else return null;              
+            }
+
+            comm.CommandText = "select * from userData where id=@id";
+            comm.Parameters.AddWithValue("@id", id);
+            using (var reader = comm.ExecuteReader())
+            {
+                reader.Read();
+                user.Email = reader["email"].ToString();
+                user.Role = reader["role"].ToString();
+                user.Token = token;    
+            }
+           
+            connection.Close();
+            return user;
         }
         //Создание токена
         private string GenerateJSONWebToken(User user)

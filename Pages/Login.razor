@@ -1,12 +1,12 @@
-﻿@page  "/login"
-
+﻿@page  "/"
 @using Tatneft.Data
 @using System.Security.Claims
-
-
+@using Blazored.LocalStorage
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
-@inject HttpClient http;
+@inject Blazored.LocalStorage.ILocalStorageService localStorageService
+
+
 
 
 <EditForm Model="@user" OnValidSubmit="@Authentication">
@@ -51,40 +51,49 @@
     protected async override Task OnInitializedAsync()
     {
         user = new User();
+        var authState = await authenticationStateTask;
+        var user_auth = authState.User;
 
-        claimsPrincipal = (await authenticationStateTask).User;
-
-        try
+        if (user_auth.Identity.IsAuthenticated)
         {
-            if (claimsPrincipal.Identity.IsAuthenticated)
-            {
-                NavigationManager.NavigateTo("https://localhost:44322/");
-            }
+            NavigationManager.NavigateTo("/home");
         }
-        catch
+        else
         {
-
+            string token = await localStorageService.GetItemAsync<string>("Token");
+            if (token != null)
+            {
+                user = new Tatneft.Data.DBWorkingSQLite().UserGetByToken(token);
+                if (user != null)
+                {
+                    ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
+                    NavigationManager.NavigateTo("/home");
+                }
+                else
+                {
+                    user = new User();
+                    claimsPrincipal = (await authenticationStateTask).User;
+                }
+            }
+            else
+            {
+                user = new User();
+                claimsPrincipal = (await authenticationStateTask).User;
+            }
         }
     }
 
     //Аутентификация пользовтеля и установка его прав доступа к контенту
     private async Task<bool> Authentication()
     {
-        string jsonString;
         DBWorkingSQLite db = new DBWorkingSQLite();
 
 
         if (db.UserAuth(user).Email != null)
         {
-            //Создание тела запроса(json) и post запрос, получение токена пользовтелем
-            jsonString = System.Text.Json.JsonSerializer.Serialize(user);
-            HttpClient httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("https://localhost:44322");
-            HttpResponseMessage response = httpClient.PostAsJsonAsync("api/User", user).Result;
-
-            
             ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo("/home");
+
             return await Task.FromResult(true);
         }
         else

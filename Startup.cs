@@ -26,6 +26,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Components.Server;
 using System.Net.Http;
 using Tatneft.Servises;
+using Blazored.LocalStorage;
+
 
 namespace Tatneft
 {
@@ -66,8 +68,9 @@ namespace Tatneft
 
             //ƒобавление сервиса авторизации
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-            //services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 
+            //ƒобавление сервиса сохранени€ сессии
+            services.AddBlazoredLocalStorage();
 
             //ƒобавление сервиса генерации jwt токена
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

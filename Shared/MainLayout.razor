@@ -1,19 +1,23 @@
 ﻿@using Tatneft.Data
 @inherits LayoutComponentBase
+
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
 <div class="sidebar">
     <NavMenu />
 </div>
 
 <div class="main">
     <div class="top-row px-4">
+        <a href="https://localhost:44322/swagger/index.html"> Documentation </a>
         <AuthorizeView>
             <Authorized>
                 <a href="/" @onclick="(() => Logout())">Logout</a>
             </Authorized>
             <NotAuthorized>
-                <a href="/login">Login</a>
+                <a href="/">Login</a>
                 <a href="/signup">Sign Up</a>
             </NotAuthorized>
         </AuthorizeView>
@@ -24,23 +28,19 @@
     </div>
 </div>
 
-@code{ 
-
+@code{
     //Маркирует пользователя как не аторизованного при выходе из аккаунта
     public async Task Logout()
     {
-        //string jsonString;
-        //DBWorkingSQLite db = new DBWorkingSQLite();
+        try
+        {
+            //await localStorage.RemoveItemAsync("Email");
+            await localStorage.RemoveItemAsync("Token");
+            await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
+            NavigationManager.NavigateTo("/home");
+        }
+        catch { }
 
-        ////Создание тела запроса(json) и post запрос, получение токена пользовтелем
-        //jsonString = System.Text.Json.JsonSerializer.Serialize(user);
-        //HttpClient httpClient = new HttpClient();
-        //httpClient.BaseAddress = new Uri("https://localhost:44322");
-        //httpClient.PostAsJsonAsync("/api/[controller]/PostTokenClean", user);
-
-
-        await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
-        NavigationManager.NavigateTo("");
     }
-   }
+}
 

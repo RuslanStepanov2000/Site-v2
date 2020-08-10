@@ -4,5 +4,19 @@
         <name>Tatneft</name>
     </assembly>
     <members>
+        <member name="M:Tatneft.Controllers.UserController.PostTokenGet(Tatneft.Data.User)">
+            <summary>
+            Аутентфиикация и получение токена
+            </summary>
+            <param name="userModel"></param>
+            <returns>Token</returns>
+        </member>
+        <member name="M:Tatneft.Controllers.UserController.PostTokenClean(Tatneft.Data.User)">
+            <summary>
+            Удлаение токена в конце сессии
+            </summary>
+            <param name="userModel"></param>
+            <returns>Void</returns>
+        </member>
     </members>
 </doc>

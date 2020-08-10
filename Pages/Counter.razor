@@ -1,28 +1,51 @@
 ﻿@page "/counter"
-@using Tatneft.Data;
-    <AuthorizeView>
-        <Authorized>
-            <h1>Counter</h1>
+@using Tatneft.Data
+@using Blazored.LocalStorage
+@using System.Security.Claims
+@inject Blazored.LocalStorage.ILocalStorageService localStorageService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
-            <p>Current count: @currentCount</p>
 
-            <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-        </Authorized>
-        <NotAuthorized>
-            <h1>
-                Вы не авторизованы
-            </h1>
-        </NotAuthorized>
-    </AuthorizeView>
+<h1>Counter</h1>
+
+<p>Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 
 @code {
     private int currentCount = 0;
-    public int regError;
 
-    private void IncrementCount()
+    private User user;
+    ClaimsPrincipal claimsPrincipal;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private async Task IncrementCount()
     {
         currentCount++;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user_auth = authState.User;
+
+        if (!user_auth.Identity.IsAuthenticated)
+        {
+            string token = await localStorageService.GetItemAsync<string>("Token");
+            if (token != null)
+            {
+                user = new Tatneft.Data.DBWorkingSQLite().UserGetByToken(token);
+                if (user != null)
+                {
+                    ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
+                }
+                else { }
+            }
+        }
     }
 }
 

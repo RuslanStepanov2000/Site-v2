@@ -17,7 +17,8 @@
 </head>
 <body>
     <app>
-        <component type="typeof(App)" render-mode="ServerPrerendered" />
+        @(await Html.RenderComponentAsync<App>(RenderMode.Server))
+        @*<component type="typeof(App)" render-mode="ServerPrerendered" />*@
     </app>
 
     <div id="blazor-error-ui">
