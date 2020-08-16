@@ -88,9 +88,12 @@
     {
         DBWorkingSQLite db = new DBWorkingSQLite();
 
-
-        if (db.UserAuth(user).Email != null)
+        user = db.UserAuth(user);
+        if (user.Email != null)
         {
+            await localStorageService.SetItemAsync<string>("Token", user.Token);
+            await localStorageService.SetItemAsync<string>("TokenRefresh", user.TokenRefresh);
+
             ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
             NavigationManager.NavigateTo("/home");
 

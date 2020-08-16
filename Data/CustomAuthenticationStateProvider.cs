@@ -55,10 +55,9 @@ namespace Tatneft.Data
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
           
         }
+        
         public async Task MarkUserAsLoggedOut()
         {
-            //await _localStorageService.RemoveItemAsync("Email");
-            //await _localStorageService.RemoveItemAsync("Token");
             var identity = new ClaimsIdentity();
             var claimsPrincipal = new ClaimsPrincipal(identity);
 

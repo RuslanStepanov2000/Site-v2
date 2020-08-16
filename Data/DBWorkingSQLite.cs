@@ -90,25 +90,31 @@ namespace Tatneft.Data
 
             // Возвращает одну строку, найденную по уникальному логину. Формат - массив из {id, email, password, role, salt}. Если пользователь не будет найден
             // возвращается пустой класс пользовтеля
-
             using (var reader = comm.ExecuteReader())
             {
                 if (reader.Read())
                 {
                     user.Salt = reader["salt"].ToString();
+
                     //Проверяем пароль. В случае успеха выдаем токен. Если пароль не правильный возвращается пустой класс пользователя
-                    
-                    //string str1 = GetPassword(user.Salt, user.Password);
-                    //string str2 = reader["password"].ToString();
                     if ( GetPassword(user.Salt, user.Password) == reader["password"].ToString())
                     {
                         user.Id = reader["id"].ToString();
                         user.Password = "";
                         user.Role = reader["role"].ToString();
 
+                        //генерация временного токена на 10минут
                         var token = GenerateJSONWebToken(user);
                         user.Token = token;
-                        UserTokenSet(user, token);
+                        var tokenExpTime = DateTime.Now.AddMinutes(10).ToString();
+
+                        //генерация рефреш токена на 7дней
+                        var tokenRefresh = GenerateJSONWebToken(user);
+                        user.TokenRefresh = tokenRefresh;
+                        var tokenRefreshExptime = DateTime.Now.AddDays(7).ToString();
+
+                        //Запись токенов в БД
+                        UserTokenSet(user, token, tokenExpTime, tokenRefresh, tokenRefreshExptime);
                         
                     }
                     else user = new User();
@@ -118,9 +124,14 @@ namespace Tatneft.Data
             connection.Close();
             return user;
         }
-        
-        //Добавление токена пользователя
-        public void UserTokenSet(User user, string token)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="data"></param>
+        /// <param name="tokentype">token, tokenRefresh, token_exp, tokenRefresh_exp</param>
+        public void UserTokenSet(User user, string data, string tokentype)
         {
             SqliteCommand comm = connection.CreateCommand();
 
@@ -133,39 +144,58 @@ namespace Tatneft.Data
                 reader.Read();
                 user.Id = reader["id"].ToString();
             }
-            comm.CommandText= "UPDATE userTokens SET token=@token WHERE id=@id";
-            //comm.CommandText = "insert into userToken (token) values(@token) where id=@id";
+            comm.CommandText= "UPDATE userTokens SET "+tokentype+"=@data WHERE id=@id";
+            comm.Parameters.AddWithValue("@data", data);
+            comm.Parameters.AddWithValue("@id", user.Id);
+            comm.ExecuteNonQuery();
+            connection.Close();
+        }
+        //Обновление всех данных для токена при регистрации
+        private void UserTokenSet(User user, string token, string tokenExpTime, string tokenRefresh, string tokenRefreshExptime)
+        {
+            SqliteCommand comm = connection.CreateCommand();
+            connection.Open();
+            comm.CommandText = "UPDATE userTokens SET token = @token, " +
+                "tokenRefresh = @tokenRefresh, " +
+                "token_exp=@token_exp, " +
+                "tokenRefresh_exp=@tokenRefresh_exp " +
+                "WHERE id =@id";
             comm.Parameters.AddWithValue("@token", token);
+            comm.Parameters.AddWithValue("@tokenRefresh", tokenRefresh);
+            comm.Parameters.AddWithValue("@token_exp", tokenExpTime);
+            comm.Parameters.AddWithValue("@tokenRefresh_exp", tokenRefreshExptime);
             comm.Parameters.AddWithValue("@id", user.Id);
             comm.ExecuteNonQuery();
             connection.Close();
         }
 
         //Получение токена пользовтеля по его Id
-        public string UserTokenGetById(string id)
+        public User UserGetById(User user)
         {
-            string token;
             SqliteCommand comm = connection.CreateCommand();
 
             connection.Open();
-            comm.CommandText = "select * from userTokens where id=@id";
-            comm.Parameters.AddWithValue("@id", id);
+            comm.CommandText = "select * from userData where id=@id";
+            comm.Parameters.AddWithValue("@id", user.Id);
 
             using (var reader = comm.ExecuteReader())
             {
                 if (reader.Read())
                 {
-                     token = reader["token"].ToString();
+                    user.Id = reader["id"].ToString();
+                    user.Email = reader["email"].ToString();
+                    user.Role = reader["role"].ToString();
                 }
-                else return "token";
+                else return new User();
             }
             connection.Close();
-            return token;
+            return user;
         }
         public User UserGetByToken(string token)
         {
             User user = new User();
             string id;
+            DateTime date_exp;
 
             SqliteCommand comm = connection.CreateCommand();
 
@@ -178,6 +208,7 @@ namespace Tatneft.Data
                 if (reader.Read())
                 {
                     id = reader["id"].ToString();
+                    date_exp =DateTime.Parse(reader["token_exp"].ToString());
                 }
                 else return null;              
             }
@@ -201,8 +232,7 @@ namespace Tatneft.Data
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Jwt:Keyqwertyuytrewertyuiqwe"));
             var credintalis = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            if (user.Email != null)
-            {
+            
                 var claims = new[] {
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -214,16 +244,50 @@ namespace Tatneft.Data
                     claims,
                     expires: DateTime.Now.AddHours(24),
                     signingCredentials: credintalis);
-                var encodetoken = new JwtSecurityTokenHandler().WriteToken(token);
-                return encodetoken;
-            }
-            else
-            {
-                return null;
-            }
-
-
+                string encodetoken = new JwtSecurityTokenHandler().WriteToken(token);
+                string token_return = encodetoken.Substring(encodetoken.LastIndexOf('.')+1);
+                return token_return;
+            
         }
-        
+        public User TokenValidate(User user)
+        {
+            SqliteCommand comm = connection.CreateCommand();
+            DBWorkingSQLite db = new DBWorkingSQLite();
+
+            connection.Open();
+            comm.CommandText = "select * from userTokens where token=@token";
+            comm.Parameters.AddWithValue("@token", user.Token);
+            using (var reader = comm.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    //Прописываем айди пользовтеля для дальнейшей удобной работы
+                    user.Id = reader["id"].ToString();
+
+                    //Сверяем его срок действия с базой
+                    if (DateTime.Parse(reader["token_exp"].ToString()) > DateTime.Now)
+                    {
+                        return user;
+                    }
+                    else
+                    {
+                        //Сверяем tokenRefresh и его срок дейсвтия с базой и в случае успеха выдаем новый token
+                        if (user.TokenRefresh == reader["tokenRefresh"].ToString()
+                        &&
+                        DateTime.Parse(reader["tokenRefresh_exp"].ToString()) > DateTime.Now)
+                        {
+                            user = db.UserGetById(user);
+                            user.Token = GenerateJSONWebToken(user);
+                            db.UserTokenSet(user, user.Token, "token");
+                            db.UserTokenSet(user, DateTime.Now.AddMinutes(10).ToString(), "token_exp");
+                        }
+                        return user;
+                    }
+
+                }
+                else return new User();
+            }
+        }
+
     }
 }

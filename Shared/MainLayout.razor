@@ -34,7 +34,7 @@
     {
         try
         {
-            //await localStorage.RemoveItemAsync("Email");
+            await localStorage.RemoveItemAsync("TokenRefresh");
             await localStorage.RemoveItemAsync("Token");
             await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
             NavigationManager.NavigateTo("/home");

@@ -16,8 +16,6 @@
 
 @code {
     private int currentCount = 0;
-
-    private User user;
     ClaimsPrincipal claimsPrincipal;
 
     [CascadingParameter]
@@ -30,22 +28,28 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await authenticationStateTask;
-        var user_auth = authState.User;
-
-        if (!user_auth.Identity.IsAuthenticated)
+        try
         {
-            string token = await localStorageService.GetItemAsync<string>("Token");
-            if (token != null)
+            User user = new User();
+            user.Token = await localStorageService.GetItemAsync<string>("Token");
+            user.TokenRefresh = await localStorageService.GetItemAsync<string>("TokenRefresh");
+            user = new DBWorkingSQLite().TokenValidate(user);
+            if (user.Id != null)
             {
-                user = new Tatneft.Data.DBWorkingSQLite().UserGetByToken(token);
-                if (user != null)
-                {
-                    ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
-                }
-                else { }
+                user = new DBWorkingSQLite().UserGetById(user);
+                ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
+            }
+            else
+            {
+
             }
         }
+        catch
+        {
+
+        }
+
+
     }
 }
 

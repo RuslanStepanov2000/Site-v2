@@ -25,7 +25,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Components.Server;
 using System.Net.Http;
-using Tatneft.Servises;
 using Blazored.LocalStorage;
 
 
@@ -64,7 +63,7 @@ namespace Tatneft
                 .AddEntityFrameworkStores<AppDbContext>();
 
             //ƒобавление сервиса работы с пользовтел€ми
-            services.AddSingleton<IUserService, UserService>();
+            //services.AddSingleton<IUserService, UserService>();
 
             //ƒобавление сервиса авторизации
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
