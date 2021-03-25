@@ -1,5 +1,6 @@
 ﻿@page  "/signup"
 @using Tatneft.Data
+@using System.Text.RegularExpressions;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorageService
@@ -59,6 +60,7 @@
         else
         {
 
+
             user = new User();
             await base.OnInitializedAsync();
 
@@ -67,10 +69,21 @@
 
     }
 
-    private void RegisterUser()
+    private async Task RegisterUser()
     {
-        DBWorkingSQLite db = new DBWorkingSQLite();
-        db.UserAddNew(user);
+        string pattern = "@";
+        if ((user.Email!=null) && (Regex.IsMatch(user.Email,pattern)) )
+        {
+            DBWorkingSQLite db = new DBWorkingSQLite();
+            db.UserAddNew(user);
+            NavigationManager.NavigateTo("/home");
+        }
+        else
+        {
+            LoginMesssage = "Please check input data";
+            await Task.FromResult(true);
+        }
+
     }
     private void Redirect()
     {

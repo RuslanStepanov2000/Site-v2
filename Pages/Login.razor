@@ -2,6 +2,7 @@
 @using Tatneft.Data
 @using System.Security.Claims
 @using Blazored.LocalStorage
+@using System.Text.RegularExpressions;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorageService
@@ -88,9 +89,20 @@
     {
         DBWorkingSQLite db = new DBWorkingSQLite();
 
-        user = db.UserAuth(user);
-        if (user.Email != null)
+        string pattern = "@";
+        if (Regex.IsMatch(user.Email, pattern))
         {
+            user = db.UserAuth(user);
+        }
+        else
+        {
+            LoginMesssage = "Invalid username or password";
+            return await Task.FromResult(true);
+        }
+        if (user.Email != null)
+        //if (Regex.IsMatch(user.Email, pattern))
+        {
+
             await localStorageService.SetItemAsync<string>("Token", user.Token);
             await localStorageService.SetItemAsync<string>("TokenRefresh", user.TokenRefresh);
 

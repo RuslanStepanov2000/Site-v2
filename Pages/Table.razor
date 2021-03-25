@@ -1,0 +1,153 @@
+﻿@page "/table"
+@using Tatneft.Data
+@using Blazored.LocalStorage
+@using System.Security.Claims
+@inject Blazored.LocalStorage.ILocalStorageService localStorageService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+
+    <table border="1">
+        <tbody>
+            <tr></tr>
+            <tr>
+                <td>
+                    <br />
+                    <h3><b>ASP.NET</b></h3>
+                    <p></p>
+                </td>
+                <td>
+                    <h6 style="text-align: left;">256</h6>
+                </td>
+                <td style="text-align: center;">
+                    <p><input type="radio" checked="checked" /></p>
+                    <p><input type="radio" checked="checked" /> <input type="radio" checked="checked" /></p>
+                    <input type="radio" checked="checked" /> <input type="radio" checked="checked" /> <input type="radio" checked="checked" p="" />
+                    <p><input type="radio" checked="checked" /></p>
+                    <p><input type="radio" checked="checked" /> <input type="radio" checked="checked" /></p>
+                    <p><input type="radio" checked="checked" /> <input type="radio" checked="checked" /> <input type="radio" checked="checked" p="" /></p>
+                    <p><input type="radio" checked="checked" /></p>
+                    <p><input type="radio" checked="checked" /> <input type="radio" checked="checked" /></p>
+                    <p><input type="radio" checked="checked" /> <input type="radio" checked="checked" /> <input type="radio" checked="checked" p="" /></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p></p>
+                    <p></p>
+                    <p><sub>0xBad</sub></p>
+                    <p></p>
+                    <p></p>
+                </td>
+                <td>
+                    <h2>ASP.NET</h2>
+                </td>
+                <td>
+                    <table border="1">
+                        <tbody>
+                            <tr>
+                                <td style="text-align: center;">0</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center;">o</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center;"><input type="radio" checked="checked" /></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p style="text-align: center;"><a href="http://google.com">google.com</a></p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p><button>4</button><button>8</button><button>15</button><button>16</button><button>23</button><button>42</button></p>
+                </td>
+                <td>
+                    <p><a href="http://127.0.0.1">127.0.0.1</a></p>
+                </td>
+                <td>Ejyjdhfghfioh</td>
+            </tr>
+            <tr>
+                <td><input type="checkbox" checked="checked" /><input type="checkbox" /><input type="checkbox" checked="checked" /><input type="checkbox" /><input type="checkbox" checked="checked" /><input type="checkbox" /></td>
+                <td>
+                    <p><strong>ASP.NET</strong></p>
+                    <p></p>
+                </td>
+                <td><sub>=====&gt;&gt;&gt;&gt;&lt;&lt;&lt;====</sub></td>
+            </tr>
+            <tr>
+                <td><input type="radio" checked="checked" /> <input type="radio" checked="checked" /> <input type="radio" checked="checked" p="" /><input type="radio" />&nbsp;</td>
+                <td>
+                    <p><input type="radio" checked="checked" /></p>
+                    <p><input type="radio" checked="checked" /> <input type="radio" checked="checked" /></p>
+                    <p><input type="radio" checked="checked" /> <input type="radio" checked="checked" /> <input type="radio" checked="checked" p="" /></p>
+                    <p><input type="radio" checked="checked" /> <input type="radio" checked="checked" /></p>
+                    <p><input type="radio" checked="checked" /></p>
+                </td>
+                <td>
+                    <h4>ASP.NET</h4>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p></p>
+                    <p style="text-align: up;">first line</p>
+                    <p>second line</p>
+                    <p></p>
+                </td>
+                <td>
+                    <p>first line</p>
+                    <p></p>
+                    <p>second&nbsp;line</p>
+                </td>
+                <td>
+                    <p>first line</p>
+                    <p></p>
+                    <p></p>
+                    <p>second line</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+@code {
+    private int currentCount = 0;
+    ClaimsPrincipal claimsPrincipal;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            User user = new User();
+            user.Token = await localStorageService.GetItemAsync<string>("Token");
+            user.TokenRefresh = await localStorageService.GetItemAsync<string>("TokenRefresh");
+            user = new DBWorkingSQLite().TokenValidate(user);
+            if (user.Id != null)
+            {
+                user = new DBWorkingSQLite().UserGetById(user);
+                ((CustomAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user);
+            }
+            else
+            {
+
+            }
+        }
+        catch
+        {
+
+        }
+
+
+    }
+}
+
+

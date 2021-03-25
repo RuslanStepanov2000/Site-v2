@@ -11,7 +11,16 @@
 
 <p>Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<AuthorizeView>
+    <Authorized>
+        <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    </Authorized>
+
+    <NotAuthorized>
+        Вы НЕ авторизованы, поэтому не можете понажимать на кнопку
+    </NotAuthorized>
+</AuthorizeView>
+
 
 
 @code {

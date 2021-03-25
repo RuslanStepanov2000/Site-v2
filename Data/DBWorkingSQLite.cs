@@ -60,15 +60,13 @@ namespace Tatneft.Data
                 comm.ExecuteNonQuery();
 
                 //Получение Id нового пользовтеля и создание записи в таблице токенов 
-                comm.CommandText = "select * from userData where email=@email";
-                comm.Parameters.AddWithValue("@email", user.Email);
-
+                comm.CommandText = "select * from userData where email='"+user.Email+"'";
                 using (var reader = comm.ExecuteReader())
                 {
                    reader.Read();
                    user.Id = reader["id"].ToString();
                 }
-                comm.CommandText = "INSERT into userTokens (id=@id)";
+                comm.CommandText = "INSERT into userTokens (id) values(@id)";
                 comm.Parameters.AddWithValue("@id", user.Id);
                 comm.ExecuteNonQuery();
                 connection.Close();
